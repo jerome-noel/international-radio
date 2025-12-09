@@ -1,49 +1,40 @@
 <template>
   <div id="map"></div>
-
-  <!-- Hidden audio player -->
   <audio ref="player"></audio>
 </template>
 
 <script>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { capitals } from "./capitals.js";
 
 export default {
   mounted() {
-    // --- Initialize map ---
     const map = L.map("map", {
-        minZoom: 3,  
-        maxZoom: 18
-        }).setView([20, 0], 3);
+      minZoom: 2,
+      maxZoom: 18
+    }).setView([20, 0], 2);
 
-    // --- Tile layer ---
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
 
-    // --- Audio player reference ---
     const player = this.$refs.player;
 
-    // Helper: play a given audio file
     function playAudio(name) {
       player.src = `/audio/${name}.mp3`;
       player.play();
     }
 
-    // --- Example markers ---
-
-    // France
-    L.marker([48.8566, 2.3522])
-      .addTo(map)
-      .bindPopup("France")
-      .on("click", () => playAudio("france"));
-
-    // USA
-    L.marker([38.9072, -77.0369])
-      .addTo(map)
-      .bindPopup("USA")
-      .on("click", () => playAudio("usa"));
+    // --- Add marker for every capital city ---
+    capitals.forEach(cap => {
+      L.marker([cap.lat, cap.lon])
+        .addTo(map)
+        .bindPopup(`${cap.city}, ${cap.country}`)
+        .on("click", () => {
+          playAudio(cap.city.toLowerCase().replace(/[^a-z0-9]/g, "_"));
+        });
+    });
   }
 };
 </script>
